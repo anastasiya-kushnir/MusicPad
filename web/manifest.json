@@ -1,6 +1,6 @@
 {
-    "name": "launch_pad_starting",
-    "short_name": "launch_pad_starting",
+    "name": "launch_pad",
+    "short_name": "launch_pad",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
