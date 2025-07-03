@@ -6,9 +6,11 @@ on:
       - master
 
 jobs:
+
   build_windows:
     name: Build Windows
     runs-on: windows-latest
+    if: ${{ hashFiles('windows/**') != '' }}
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2
@@ -34,7 +36,7 @@ jobs:
 
   build_android:
     name: Build Android
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2
@@ -47,9 +49,9 @@ jobs:
         run: |
           git clone https://github.com/flutter/flutter.git --depth 1 -b 3.32.5 _flutter
       - name: Get Packages
-        run: ${{ github.workspace }}\_flutter\bin\flutter.bat pub get
+        run: ${{ github.workspace }}/_flutter/bin/flutter pub get
       - name: Build Android APK
-        run: ${{ github.workspace }}\_flutter\bin\flutter.bat build apk --release
+        run: ${{ github.workspace }}/_flutter/bin/flutter build apk --release
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
@@ -58,7 +60,7 @@ jobs:
 
   build_web:
     name: Build Web
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2
@@ -71,9 +73,9 @@ jobs:
         run: |
           git clone https://github.com/flutter/flutter.git --depth 1 -b 3.32.5 _flutter
       - name: Get Packages
-        run: ${{ github.workspace }}\_flutter\bin\flutter.bat pub get
+        run: ${{ github.workspace }}/_flutter/bin/flutter pub get
       - name: Build Web
-        run: ${{ github.workspace }}\_flutter\bin\flutter.bat build web --release
+        run: ${{ github.workspace }}/_flutter/bin/flutter build web --release
       - name: Upload Web Artifact
         uses: actions/upload-artifact@v4
         with:
