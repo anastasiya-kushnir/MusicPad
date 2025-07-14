@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:just_audio/just_audio.dart';
 
 void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
   runApp(const MyApp());
 }
 
@@ -119,6 +122,8 @@ class _PadState extends State<Pad> {
   }
 
   Future<void> _handleTap() async {
+    if (!mounted) return;
+
     setState(() {
       _colorCenter = Colors.white;
       _colorOutline = Colors.white;
@@ -130,7 +135,16 @@ class _PadState extends State<Pad> {
       await tempPlayer.setAudioSource(
         AudioSource.asset('assets/${widget.note}'),
       );
-      await tempPlayer.play();
+      tempPlayer.play();
+
+      Future.delayed(const Duration(milliseconds: 150), () {
+        if (mounted) {
+          setState(() {
+            _colorCenter = widget.colorCenter;
+            _colorOutline = widget.colorOutline;
+          });
+        }
+      });
 
       tempPlayer.playerStateStream.listen((state) {
         if (state.processingState == ProcessingState.completed) {
@@ -139,16 +153,8 @@ class _PadState extends State<Pad> {
       });
     } catch (e) {
       debugPrint("Playback Error: $e");
+      tempPlayer.dispose();
     }
-
-    Future.delayed(const Duration(milliseconds: 200), () {
-      if (mounted) {
-        setState(() {
-          _colorCenter = widget.colorCenter;
-          _colorOutline = widget.colorOutline;
-        });
-      }
-    });
   }
 
   @override
