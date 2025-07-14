@@ -86,11 +86,12 @@ class Pad extends StatefulWidget {
   final Color colorOutline;
   final String note;
 
-  const Pad(
-      {super.key,
-      required this.colorCenter,
-      required this.colorOutline,
-      required this.note});
+  const Pad({
+    Key? key,
+    required this.colorCenter,
+    required this.colorOutline,
+    required this.note,
+  }) : super(key: key);
 
   @override
   State<Pad> createState() => _PadState();
@@ -99,7 +100,6 @@ class Pad extends StatefulWidget {
 class _PadState extends State<Pad> {
   late Color _colorCenter;
   late Color _colorOutline;
-  final AudioPlayer _player = AudioPlayer();
 
   @override
   void initState() {
@@ -114,8 +114,12 @@ class _PadState extends State<Pad> {
       _colorOutline = Colors.white;
     });
 
-    await _player.play(AssetSource(widget.note));
-    await Future.delayed(const Duration(milliseconds: 300));
+    final tempPlayer = AudioPlayer()..setReleaseMode(ReleaseMode.stop);
+
+    await tempPlayer.play(AssetSource(widget.note),
+        mode: PlayerMode.lowLatency);
+
+    await Future.delayed(const Duration(milliseconds: 150));
 
     if (mounted) {
       setState(() {
