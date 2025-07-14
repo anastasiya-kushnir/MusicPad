@@ -124,23 +124,33 @@ class _PadState extends State<Pad> {
       _colorOutline = Colors.white;
     });
 
+    final tempPlayer = AudioPlayer();
+
     try {
-      await widget.sharedPlayer.setAudioSource(
+      await tempPlayer.setAudioSource(
         AudioSource.asset('assets/${widget.note}'),
       );
-      await widget.sharedPlayer.play();
-    } catch (e) {
-      debugPrint("Ошибка воспроизведения: $e");
-    }
+      await tempPlayer.play();
 
-    await Future.delayed(const Duration(milliseconds: 150));
-
-    if (mounted) {
-      setState(() {
-        _colorCenter = widget.colorCenter;
-        _colorOutline = widget.colorOutline;
+      tempPlayer.playerStateStream.listen((state) {
+        if (state.processingState == ProcessingState.completed) {
+          tempPlayer.dispose();
+        }
       });
+    } catch (e) {
+      debugPrint("Playback Error: $e");
     }
+
+    Future.microtask(() {
+      Future.delayed(const Duration(milliseconds: 100), () {
+        if (mounted) {
+          setState(() {
+            _colorCenter = widget.colorCenter;
+            _colorOutline = widget.colorOutline;
+          });
+        }
+      });
+    });
   }
 
   @override
