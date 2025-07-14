@@ -2,7 +2,39 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  final cache = AudioCache(prefix: 'assets/');
+  await cache.loadAll([
+    "1.mp3",
+    "2.mp3",
+    "3.mp3",
+    "4.mp3",
+    "5.mp3",
+    "6.mp3",
+    "7.mp3",
+    "8.mp3",
+    "9.mp3",
+    "10.mp3",
+    "11.mp3",
+    "12.mp3",
+    "13.mp3",
+    "14.mp3",
+    "15.mp3",
+    "16.mp3",
+    "17.mp3",
+    "18.mp3",
+    "19.mp3",
+    "20.wav",
+    "21.mp3",
+    "22.wav",
+    "23.wav",
+    "24.wav",
+    "25.wav",
+    "26.wav",
+    "27.wav",
+    "28.wav"
+  ]);
   runApp(const MyApp());
 }
 
@@ -38,14 +70,14 @@ class MyApp extends StatelessWidget {
       "25.wav",
       "26.wav",
       "27.wav",
-      "28.mp3"
+      "28.wav"
     ];
 
     final List<Color> colors = [
       Colors.deepPurple,
       Colors.orange,
       Colors.indigoAccent,
-      Colors.teal,
+      Colors.redAccent,
     ];
 
     return List.generate(notes.length, (index) {
@@ -100,12 +132,22 @@ class Pad extends StatefulWidget {
 class _PadState extends State<Pad> {
   late Color _colorCenter;
   late Color _colorOutline;
+  late AudioPlayer _player;
+  final _audioCache = AudioCache(prefix: 'assets/');
 
   @override
   void initState() {
     super.initState();
     _colorCenter = widget.colorCenter;
     _colorOutline = widget.colorOutline;
+    _player = AudioPlayer();
+    _audioCache.load(widget.note);
+  }
+
+  @override
+  void dispose() {
+    _player.dispose();
+    super.dispose();
   }
 
   Future<void> _handleTap() async {
@@ -114,12 +156,15 @@ class _PadState extends State<Pad> {
       _colorOutline = Colors.white;
     });
 
-    final tempPlayer = AudioPlayer()..setReleaseMode(ReleaseMode.stop);
+    final tempPlayer = AudioPlayer();
+    await tempPlayer.setReleaseMode(ReleaseMode.stop);
+    await tempPlayer.play(AssetSource(widget.note));
 
-    await tempPlayer.play(AssetSource(widget.note),
-        mode: PlayerMode.lowLatency);
+    tempPlayer.onPlayerComplete.listen((event) {
+      tempPlayer.dispose();
+    });
 
-    await Future.delayed(const Duration(milliseconds: 150));
+    await Future.delayed(const Duration(milliseconds: 50));
 
     if (mounted) {
       setState(() {
