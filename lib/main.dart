@@ -1,47 +1,15 @@
-import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:just_audio/just_audio.dart';
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  final cache = AudioCache(prefix: 'assets/');
-  await cache.loadAll([
-    "1.mp3",
-    "2.mp3",
-    "3.mp3",
-    "4.mp3",
-    "5.mp3",
-    "6.mp3",
-    "7.mp3",
-    "8.mp3",
-    "9.mp3",
-    "10.mp3",
-    "11.mp3",
-    "12.mp3",
-    "13.mp3",
-    "14.mp3",
-    "15.mp3",
-    "16.mp3",
-    "17.mp3",
-    "18.mp3",
-    "19.mp3",
-    "20.wav",
-    "21.mp3",
-    "22.wav",
-    "23.wav",
-    "24.wav",
-    "25.wav",
-    "26.wav",
-    "27.wav",
-    "28.wav"
-  ]);
   runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
 
-  List<Pad> buildPads() {
+  List<Pad> buildPads(AudioPlayer player) {
     final List<String> notes = [
       "1.mp3",
       "2.mp3",
@@ -82,15 +50,17 @@ class MyApp extends StatelessWidget {
 
     return List.generate(notes.length, (index) {
       return Pad(
-        colorCenter: Colors.white,
-        colorOutline: colors[index % colors.length],
-        note: notes[index],
-      );
+          colorCenter: Colors.white,
+          colorOutline: colors[index % colors.length],
+          note: notes[index],
+          sharedPlayer: player);
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    final sharedPlayer = AudioPlayer();
+
     return MaterialApp(
       title: "MusicPad",
       debugShowCheckedModeBanner: false,
@@ -104,7 +74,7 @@ class MyApp extends StatelessWidget {
           child: Wrap(
             spacing: 6,
             runSpacing: 6,
-            children: buildPads(),
+            children: buildPads(sharedPlayer),
           ),
         ),
         backgroundColor: Colors.black,
@@ -117,12 +87,14 @@ class Pad extends StatefulWidget {
   final Color colorCenter;
   final Color colorOutline;
   final String note;
+  final AudioPlayer sharedPlayer;
 
   const Pad({
     Key? key,
     required this.colorCenter,
     required this.colorOutline,
     required this.note,
+    required this.sharedPlayer,
   }) : super(key: key);
 
   @override
@@ -132,21 +104,17 @@ class Pad extends StatefulWidget {
 class _PadState extends State<Pad> {
   late Color _colorCenter;
   late Color _colorOutline;
-  late AudioPlayer _player;
-  final _audioCache = AudioCache(prefix: 'assets/');
 
   @override
   void initState() {
     super.initState();
     _colorCenter = widget.colorCenter;
     _colorOutline = widget.colorOutline;
-    _player = AudioPlayer();
-    _audioCache.load(widget.note);
   }
 
   @override
   void dispose() {
-    _player.dispose();
+    // _player.dispose();
     super.dispose();
   }
 
@@ -156,15 +124,16 @@ class _PadState extends State<Pad> {
       _colorOutline = Colors.white;
     });
 
-    final tempPlayer = AudioPlayer();
-    await tempPlayer.setReleaseMode(ReleaseMode.stop);
-    await tempPlayer.play(AssetSource(widget.note));
+    try {
+      await widget.sharedPlayer.setAudioSource(
+        AudioSource.asset('assets/${widget.note}'),
+      );
+      await widget.sharedPlayer.play();
+    } catch (e) {
+      debugPrint("Ошибка воспроизведения: $e");
+    }
 
-    tempPlayer.onPlayerComplete.listen((event) {
-      tempPlayer.dispose();
-    });
-
-    await Future.delayed(const Duration(milliseconds: 50));
+    await Future.delayed(const Duration(milliseconds: 150));
 
     if (mounted) {
       setState(() {
