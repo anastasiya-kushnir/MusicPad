@@ -141,15 +141,13 @@ class _PadState extends State<Pad> {
       debugPrint("Playback Error: $e");
     }
 
-    Future.microtask(() {
-      Future.delayed(const Duration(milliseconds: 100), () {
-        if (mounted) {
-          setState(() {
-            _colorCenter = widget.colorCenter;
-            _colorOutline = widget.colorOutline;
-          });
-        }
-      });
+    Future.delayed(const Duration(milliseconds: 200), () {
+      if (mounted) {
+        setState(() {
+          _colorCenter = widget.colorCenter;
+          _colorOutline = widget.colorOutline;
+        });
+      }
     });
   }
 
@@ -159,7 +157,9 @@ class _PadState extends State<Pad> {
       onTap: _handleTap,
       child: LayoutBuilder(
         builder: (context, constraints) {
-          return Container(
+          return AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            curve: Curves.easeInOut,
             height: MediaQuery.of(context).size.height / 8.2,
             width: MediaQuery.of(context).size.width / 4.3,
             decoration: BoxDecoration(
