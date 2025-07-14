@@ -20,7 +20,7 @@ dev_dependencies:
 
   flutter_app_name: ^0.1.1
 flutter_app_name:
-  name: "LaunchPad"
+  name: "MusicPad"
 
 flutter:
   uses-material-design: true
